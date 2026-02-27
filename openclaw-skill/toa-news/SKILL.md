@@ -1,284 +1,309 @@
-> ## Documentation Index
-> Fetch the complete documentation index at: https://agentskills.io/llms.txt
-> Use this file to discover all available pages before exploring further.
+---
+name: toa-news
+description: 实时加密货币新闻 API。支持关键词搜索、币种过滤、来源筛选。毫秒级更新，6551 兼容格式。
+user-invocable: true
+metadata:
+  openclaw:
+    requires:
+      bins:
+        - curl
+    emoji: "📡"
+    tags:
+      - crypto
+      - news
+      - trading
+      - api
+    os:
+      - darwin
+      - linux
+      - win32
+  version: 2.0.0
+---
 
-# Overview
+# ToA Crypto News Agent
 
-> A simple, open format for giving agents new capabilities and expertise.
+你是一个**加密货币新闻检索 Agent**。你通过调用 ToA News API 获取毫秒级市场情报。
 
-export const LogoCarousel = () => {
-  const logos = [{
-    name: "Junie",
-    url: "https://junie.jetbrains.com/",
-    lightSrc: "/images/logos/junie/junie-logo-on-white.svg",
-    darkSrc: "/images/logos/junie/junie-logo-on-dark.svg"
-  }, {
-    name: "Gemini CLI",
-    url: "https://geminicli.com",
-    lightSrc: "/images/logos/gemini-cli/gemini-cli-logo_light.svg",
-    darkSrc: "/images/logos/gemini-cli/gemini-cli-logo_dark.svg"
-  }, {
-    name: "Autohand Code CLI",
-    url: "https://autohand.ai/",
-    lightSrc: "/images/logos/autohand/autohand-light.svg",
-    darkSrc: "/images/logos/autohand/autohand-dark.svg",
-    width: "120px"
-  }, {
-    name: "OpenCode",
-    url: "https://opencode.ai/",
-    lightSrc: "/images/logos/opencode/opencode-wordmark-light.svg",
-    darkSrc: "/images/logos/opencode/opencode-wordmark-dark.svg"
-  }, {
-    name: "OpenHands",
-    url: "https://www.all-hands.dev/",
-    lightSrc: "/images/logos/openhands/openhands-logo-light.svg",
-    darkSrc: "/images/logos/openhands/openhands-logo-dark.svg"
-  }, {
-    name: "Mux",
-    url: "https://mux.coder.com/",
-    lightSrc: "/images/logos/mux/mux-editor-light.svg",
-    darkSrc: "/images/logos/mux/mux-editor-dark.svg",
-    width: "120px"
-  }, {
-    name: "Cursor",
-    url: "https://cursor.com/",
-    lightSrc: "/images/logos/cursor/LOCKUP_HORIZONTAL_2D_LIGHT.svg",
-    darkSrc: "/images/logos/cursor/LOCKUP_HORIZONTAL_2D_DARK.svg"
-  }, {
-    name: "Amp",
-    url: "https://ampcode.com/",
-    lightSrc: "/images/logos/amp/amp-logo-light.svg",
-    darkSrc: "/images/logos/amp/amp-logo-dark.svg",
-    width: "120px"
-  }, {
-    name: "Letta",
-    url: "https://www.letta.com/",
-    lightSrc: "/images/logos/letta/Letta-logo-RGB_OffBlackonTransparent.svg",
-    darkSrc: "/images/logos/letta/Letta-logo-RGB_GreyonTransparent.svg"
-  }, {
-    name: "Firebender",
-    url: "https://firebender.com/",
-    lightSrc: "/images/logos/firebender/firebender-wordmark-light.svg",
-    darkSrc: "/images/logos/firebender/firebender-wordmark-dark.svg"
-  }, {
-    name: "Goose",
-    url: "https://block.github.io/goose/",
-    lightSrc: "/images/logos/goose/goose-logo-black.png",
-    darkSrc: "/images/logos/goose/goose-logo-white.png"
-  }, {
-    name: "GitHub",
-    url: "https://github.com/",
-    lightSrc: "/images/logos/github/GitHub_Lockup_Dark.svg",
-    darkSrc: "/images/logos/github/GitHub_Lockup_Light.svg"
-  }, {
-    name: "VS Code",
-    url: "https://code.visualstudio.com/",
-    lightSrc: "/images/logos/vscode/vscode.svg",
-    darkSrc: "/images/logos/vscode/vscode-alt.svg"
-  }, {
-    name: "Claude Code",
-    url: "https://claude.ai/code",
-    lightSrc: "/images/logos/claude-code/Claude-Code-logo-Slate.svg",
-    darkSrc: "/images/logos/claude-code/Claude-Code-logo-Ivory.svg"
-  }, {
-    name: "Claude",
-    url: "https://claude.ai/",
-    lightSrc: "/images/logos/claude-ai/Claude-logo-Slate.svg",
-    darkSrc: "/images/logos/claude-ai/Claude-logo-Ivory.svg"
-  }, {
-    name: "OpenAI Codex",
-    url: "https://developers.openai.com/codex",
-    lightSrc: "/images/logos/oai-codex/OAI_Codex-Lockup_400px.svg",
-    darkSrc: "/images/logos/oai-codex/OAI_Codex-Lockup_400px_Darkmode.svg"
-  }, {
-    name: "Piebald",
-    url: "https://piebald.ai",
-    lightSrc: "/images/logos/piebald/Piebald_wordmark_light.svg",
-    darkSrc: "/images/logos/piebald/Piebald_wordmark_dark.svg"
-  }, {
-    name: "Factory",
-    url: "https://factory.ai/",
-    lightSrc: "/images/logos/factory/factory-logo-light.svg",
-    darkSrc: "/images/logos/factory/factory-logo-dark.svg"
-  }, {
-    name: "pi",
-    url: "https://shittycodingagent.ai/",
-    lightSrc: "/images/logos/pi/pi-logo-light.svg",
-    darkSrc: "/images/logos/pi/pi-logo-dark.svg",
-    width: "80px"
-  }, {
-    name: "Databricks",
-    url: "https://databricks.com/",
-    lightSrc: "/images/logos/databricks/databricks-logo-light.svg",
-    darkSrc: "/images/logos/databricks/databricks-logo-dark.svg"
-  }, {
-    name: "Agentman",
-    url: "https://agentman.ai/",
-    lightSrc: "/images/logos/agentman/agentman-wordmark-light.svg",
-    darkSrc: "/images/logos/agentman/agentman-wordmark-dark.svg"
-  }, {
-    name: "TRAE",
-    url: "https://trae.ai/",
-    lightSrc: "/images/logos/trae/trae-logo-lightmode.svg",
-    darkSrc: "/images/logos/trae/trae-logo-darkmode.svg"
-  }, {
-    name: "Spring AI",
-    url: "https://docs.spring.io/spring-ai/reference",
-    lightSrc: "/images/logos/spring-ai/spring-ai-logo-light.svg",
-    darkSrc: "/images/logos/spring-ai/spring-ai-logo-dark.svg"
-  }, {
-    name: "Roo Code",
-    url: "https://roocode.com",
-    lightSrc: "/images/logos/roo-code/roo-code-logo-black.svg",
-    darkSrc: "/images/logos/roo-code/roo-code-logo-white.svg"
-  }, {
-    name: "Mistral AI Vibe",
-    url: "https://github.com/mistralai/mistral-vibe",
-    lightSrc: "/images/logos/mistral-vibe/vibe-logo_black.svg",
-    darkSrc: "/images/logos/mistral-vibe/vibe-logo_white.svg",
-    width: "80px"
-  }, {
-    name: "Command Code",
-    url: "https://commandcode.ai/",
-    lightSrc: "/images/logos/command-code/command-code-logo-for-light.svg",
-    darkSrc: "/images/logos/command-code/command-code-logo-for-dark.svg",
-    width: "200px"
-  }, {
-    name: "Ona",
-    url: "https://ona.com",
-    lightSrc: "/images/logos/ona/ona-wordmark-light.svg",
-    darkSrc: "/images/logos/ona/ona-wordmark-dark.svg",
-    width: "120px"
-  }, {
-    name: "VT Code",
-    url: "https://github.com/vinhnx/vtcode",
-    lightSrc: "/images/logos/vtcode/vt_code_light.svg",
-    darkSrc: "/images/logos/vtcode/vt_code_dark.svg"
-  }, {
-    name: "Qodo",
-    url: "https://www.qodo.ai/",
-    lightSrc: "/images/logos/qodo/qodo-logo-light.png",
-    darkSrc: "/images/logos/qodo/qodo-logo-dark.svg"
-  }, {
-    name: "Laravel Boost",
-    url: "https://github.com/laravel/boost",
-    lightSrc: "/images/logos/laravel-boost/boost-light-mode.svg",
-    darkSrc: "/images/logos/laravel-boost/boost-dark-mode.svg"
-  }, {
-    name: "Emdash",
-    url: "https://emdash.sh",
-    lightSrc: "/images/logos/emdash/emdash-logo-light.svg",
-    darkSrc: "/images/logos/emdash/emdash-logo-dark.svg"
-  }];
-  const [shuffled, setShuffled] = useState(logos);
-  useEffect(() => {
-    const shuffle = items => {
-      const copy = [...items];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    };
-    setShuffled(shuffle(logos));
-  }, []);
-  const row1 = shuffled.filter((_, i) => i % 2 === 0);
-  const row2 = shuffled.filter((_, i) => i % 2 === 1);
-  const row1Doubled = [...row1, ...row1];
-  const row2Doubled = [...row2, ...row2];
-  return <>
-      <div className="logo-carousel">
-        <div className="logo-carousel-track" style={{
-    animation: 'logo-scroll 50s linear infinite'
-  }}>
-          {row1Doubled.map((logo, i) => <a key={`${logo.name}-${i}`} href={logo.url} style={{
-    textDecoration: 'none',
-    border: 'none'
-  }}>
-              <img className="block dark:hidden object-contain" style={{
-    width: logo.width || '150px',
-    maxWidth: '100%'
-  }} src={logo.lightSrc} alt={logo.name} />
-              <img className="hidden dark:block object-contain" style={{
-    width: logo.width || '150px',
-    maxWidth: '100%'
-  }} src={logo.darkSrc} alt={logo.name} />
-            </a>)}
-        </div>
-      </div>
-      <div className="logo-carousel">
-        <div className="logo-carousel-track" style={{
-    animation: 'logo-scroll 60s linear infinite reverse'
-  }}>
-          {row2Doubled.map((logo, i) => <a key={`${logo.name}-${i}`} href={logo.url} style={{
-    textDecoration: 'none',
-    border: 'none'
-  }}>
-              <img className="block dark:hidden object-contain" style={{
-    width: logo.width || '150px',
-    maxWidth: '100%'
-  }} src={logo.lightSrc} alt={logo.name} />
-              <img className="hidden dark:block object-contain" style={{
-    width: logo.width || '150px',
-    maxWidth: '100%'
-  }} src={logo.darkSrc} alt={logo.name} />
-            </a>)}
-        </div>
-      </div>
-    </>;
-};
+---
 
-Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently.
+## Base URL
 
-## Why Agent Skills?
+```
+https://web-production-666f44.up.railway.app
+```
 
-Agents are increasingly capable, but often don't have the context they need to do real work reliably. Skills solve this by giving agents access to procedural knowledge and company-, team-, and user-specific context they can load on demand. Agents with access to a set of skills can extend their capabilities based on the task they're working on.
+---
 
-**For skill authors**: Build capabilities once and deploy them across multiple agent products.
+## API Endpoints
 
-**For compatible agents**: Support for skills lets end users give agents new capabilities out of the box.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | 健康检查 |
+| `/news` | GET | 简单获取 |
+| `/news_search` | POST | **核心端点** - 所有高级查询 |
 
-**For teams and enterprises**: Capture organizational knowledge in portable, version-controlled packages.
+---
 
-## What can Agent Skills enable?
+## Discovery (发现接口)
 
-* **Domain expertise**: Package specialized knowledge into reusable instructions, from legal review processes to data analysis pipelines.
-* **New capabilities**: Give agents new capabilities (e.g. creating presentations, building MCP servers, analyzing datasets).
-* **Repeatable workflows**: Turn multi-step tasks into consistent and auditable workflows.
-* **Interoperability**: Reuse the same skill across different skills-compatible agent products.
+### get_news_sources — 获取新闻来源类别
 
-## Adoption
+当前支持的来源类型:
+- `Bloomberg`, `Reuters`, `COINTELEGRAPH`, `COINDESK`
+- `direct` (Twitter/社交媒体)
+- `FINANCE WIRE`, `BARRONS`, `DLNEWS`
 
-Agent Skills are supported by leading AI development tools.
+### list_news_types — 引擎类型列表
 
-<LogoCarousel />
+| engineType | Description |
+|------------|-------------|
+| `news` | 主流新闻媒体 |
+| `listing` | 上市/下架公告 |
+| `onchain` | 链上数据分析 |
+| `meme` | Meme 币相关 |
+| `market` | 市场数据 |
 
-## Open development
+---
 
-The Agent Skills format was originally developed by [Anthropic](https://www.anthropic.com/), released as an open standard, and has been adopted by a growing number of agent products. The standard is open to contributions from the broader ecosystem.
+## POST /news_search — Payload Schema
 
-[View on GitHub](https://github.com/agentskills/agentskills)
+### 完整参数表
 
-## Get started
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `limit` | integer | ✅ | - | 每页结果数 (1-100) |
+| `page` | integer | ✅ | - | 页码 (从 1 开始) |
+| `q` | string | ❌ | null | 全文关键词搜索 |
+| `coins` | string[] | ❌ | null | 币种符号数组，如 `["BTC", "ETH"]` |
+| `hasCoin` | boolean | ❌ | false | 仅返回包含币种标记的新闻 |
+| `source` | string | ❌ | null | 来源筛选，如 `"Bloomberg"` |
+| `engineType` | string | ❌ | null | 引擎类型: `news`/`listing`/`onchain`/`meme`/`market` |
+| `startTime` | integer | ❌ | null | 开始时间 (Unix 毫秒) |
+| `endTime` | integer | ❌ | null | 结束时间 (Unix 毫秒) |
 
-<CardGroup cols={3}>
-  <Card title="What are skills?" icon="lightbulb" href="/what-are-skills">
-    Learn about skills, how they work, and why they matter.
-  </Card>
+---
 
-  <Card title="Specification" icon="file-code" href="/specification">
-    The complete format specification for SKILL.md files.
-  </Card>
+## Intent → Payload 映射
 
-  <Card title="Integrate skills" icon="gear" href="/integrate-skills">
-    Add skills support to your agent or tool.
-  </Card>
+### 1. get_latest_news — 获取最新
 
-  <Card title="Example skills" icon="code" href="https://github.com/anthropics/skills">
-    Browse example skills on GitHub.
-  </Card>
+```bash
+curl -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"limit": 10, "page": 1}'
+```
 
-  <Card title="Reference library" icon="wrench" href="https://github.com/agentskills/agentskills/tree/main/skills-ref">
-    Validate skills and generate prompt XML.
-  </Card>
-</CardGroup>
+### 2. search_news — 关键词搜索
+
+```bash
+curl -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "bitcoin ETF", "limit": 10, "page": 1}'
+```
+
+### 3. search_news_by_coin — 币种搜索
+
+```bash
+curl -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"coins": ["BTC", "ETH"], "limit": 10, "page": 1}'
+```
+
+### 4. get_news_by_source — 来源筛选
+
+```bash
+curl -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "Bloomberg", "limit": 10, "page": 1}'
+```
+
+### 5. get_news_by_engine — 引擎类型筛选
+
+```bash
+curl -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "onchain", "limit": 10, "page": 1}'
+```
+
+### 6. search_news_by_date — 日期范围
+
+```bash
+curl -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"startTime": 1772150400000, "endTime": 1772236800000, "limit": 20, "page": 1}'
+```
+
+---
+
+## Response Structure
+
+### 顶层响应
+
+```json
+{
+  "success": true,
+  "total": 130,
+  "page": 1,
+  "limit": 10,
+  "quota": "unlimited",
+  "data": [NewsArticle, ...]
+}
+```
+
+### NewsArticle 对象
+
+```json
+{
+  "id": "2027363213940293775",
+  "text": "Yi He (@heyibinance)",
+  "body": "Binance is actively exploring talent...",
+  "newsType": "direct",
+  "engineType": "news",
+  "link": "https://twitter.com/heyibinance/status/...",
+  "ts": 1772196031975,
+  "receivedAt": "2026-02-27T12:40:32.615200+00:00",
+  "coins": [
+    {
+      "symbol": "BNB",
+      "market_type": "spot",
+      "match": "title",
+      "symbols": [
+        {"exchange": "binance-futures", "symbol": "BNBUSDT"},
+        {"exchange": "binance", "symbol": "BNBUSDT"}
+      ]
+    }
+  ]
+}
+```
+
+### 字段说明
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | 唯一文章 ID |
+| `text` | string | 标题/来源名称 |
+| `body` | string | 完整内容文本 |
+| `newsType` | string | 来源类型 |
+| `engineType` | string | 引擎类别 |
+| `link` | string | 原文 URL |
+| `ts` | integer | Unix 时间戳 (毫秒) |
+| `receivedAt` | string | ISO 8601 接收时间 |
+| `coins` | array | 检测到的币种及交易对 |
+| `coins[].symbol` | string | 币种符号 |
+| `coins[].market_type` | string | 市场类型 (spot/futures) |
+| `coins[].match` | string | 匹配位置 (title/body) |
+| `coins[].symbols` | array | 可交易对列表 |
+
+---
+
+## Standard Operating Procedures (SOP)
+
+### SOP-1: 市场概览
+
+**触发**: "最新新闻"、"市场动态"、"发生了什么"
+
+**Payload**:
+```json
+{"limit": 10, "page": 1}
+```
+
+**输出格式**:
+```
+📡 市场快讯 (10条)
+━━━━━━━━━━━━━━━━━━
+
+1️⃣ [BTC] 标题...
+   💡 影响: 简要分析
+
+2️⃣ [ETH] 标题...
+   💡 影响: 简要分析
+```
+
+---
+
+### SOP-2: 特定币种研究
+
+**触发**: "BTC 新闻"、"ETH 消息"、"SOL 发生了什么"
+
+**Payload**:
+```json
+{"coins": ["BTC"], "limit": 20, "page": 1}
+```
+
+**输出格式**:
+```
+🔍 BTC 相关新闻 (共 X 条)
+━━━━━━━━━━━━━━━━━━
+
+利多:
+• 新闻1...
+• 新闻2...
+
+利空:
+• 新闻3...
+
+判断: [看多/看空/中性] + 理由
+```
+
+---
+
+### SOP-3: 来源筛选
+
+**触发**: "Bloomberg 报道"、"Reuters 新闻"、"主流媒体"
+
+**Payload**:
+```json
+{"q": "Bloomberg", "limit": 10, "page": 1}
+```
+
+---
+
+### SOP-4: 链上数据新闻
+
+**触发**: "链上数据"、"onchain"、"巨鲸动向"
+
+**Payload**:
+```json
+{"q": "onchain", "limit": 10, "page": 1}
+```
+
+---
+
+### SOP-5: 关键词搜索
+
+**触发**: 任意话题 "ETF"、"Binance"、"监管"、"空投"
+
+**Payload**:
+```json
+{"q": "用户关键词", "limit": 10, "page": 1}
+```
+
+---
+
+### SOP-6: 只看有币种的新闻
+
+**触发**: "有交易机会的新闻"、"币种相关"
+
+**Payload**:
+```json
+{"hasCoin": true, "limit": 10, "page": 1}
+```
+
+---
+
+## Health Check
+
+```bash
+curl -s "https://web-production-666f44.up.railway.app/health"
+```
+
+返回: `{"status": "ok"}`
+
+---
+
+## Notes
+
+- **数据源**: Tree of Alpha WebSocket (实时)
+- **更新频率**: 毫秒级
+- **存储**: Cloud PostgreSQL (24/7 持久化)
+- **Rate Limit**: 当前无限制
