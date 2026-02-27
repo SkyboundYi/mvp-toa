@@ -1,98 +1,79 @@
+cat > worker.py << 'EOF'
 #!/usr/bin/env python3
-"""
-ToA WebSocket Listener - MVP 版本
-直接搬运，原样存储
-"""
-import os
-import json
-import sqlite3
-import time
+import os, json, time
 from datetime import datetime
 import websocket
+import psycopg2
 
-# ============================================
-# 配置
-# ============================================
-TOA_WSS_URL = os.getenv("TOA_WSS_URL", "wss://news.treeofalpha.com/ws")
-TOA_API_KEY = os.getenv("TOA_API_KEY", "")
-DB_PATH = "news.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# ============================================
-# 数据库初始化
-# ============================================
+def get_conn():
+    return psycopg2.connect(DATABASE_URL)
+
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.execute("""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS raw_news (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            raw_data TEXT NOT NULL,
-            received_at TEXT NOT NULL
+            id SERIAL PRIMARY KEY,
+            raw_data JSONB NOT NULL,
+            received_at TIMESTAMPTZ DEFAULT NOW()
         )
     """)
     conn.commit()
+    cur.close()
     conn.close()
     print("✅ Database initialized")
 
-# ============================================
-# 存储原始数据
-# ============================================
-def save_raw(data: dict):
-    # TODO: 未来在这里接入数据清洗和重构逻辑
-    # cleaned = clean_and_transform(data)
-    
-    conn = sqlite3.connect(DB_PATH)
-    conn.execute(
-        "INSERT INTO raw_news (raw_data, received_at) VALUES (?, ?)",
-        (json.dumps(data), datetime.utcnow().isoformat())
-    )
+def save_raw(data):
+    # TODO: 未来在这里接入数据清洗逻辑
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO raw_news (raw_data) VALUES (%s)", (json.dumps(data),))
     conn.commit()
+    cur.close()
     conn.close()
-    print(f"💾 Saved to DB")
+    print("💾 Saved")
 
-# ============================================
-# WebSocket 回调
-# ============================================
-def on_message(ws, message):
+def on_message(ws, msg):
     try:
-        data = json.loads(message)
-        print(f"📥 Received: {str(data)[:100]}...")
+        data = json.loads(msg)
+        print(f"📥 {str(data)[:80]}...")
         save_raw(data)
     except Exception as e:
-        print(f"❌ Error: {e}")
-
-def on_error(ws, error):
-    print(f"❌ WS Error: {error}")
-
-def on_close(ws, code, msg):
-    print(f"🔌 WS Closed: {code} {msg}")
+        print(f"❌ {e}")
 
 def on_open(ws):
-    print("✅ WS Connected to ToA")
+    print("✅ Connected to ToA")
 
-# ============================================
-# 主函数
-# ============================================
+def on_error(ws, err):
+    print(f"❌ WS Error: {err}")
+
+def on_close(ws, code, msg):
+    print(f"🔌 Closed: {code}")
+
 def main():
+    if not DATABASE_URL:
+        print("❌ DATABASE_URL not set!")
+        return
     init_db()
-    print(f"🚀 Connecting to {TOA_WSS_URL}")
-    
+    print("🚀 Connecting to ToA WebSocket...")
     ws = websocket.WebSocketApp(
-        TOA_WSS_URL,
+        "wss://news.treeofalpha.com/ws",
         on_open=on_open,
         on_message=on_message,
         on_error=on_error,
         on_close=on_close
     )
-    
     while True:
         try:
             ws.run_forever()
         except KeyboardInterrupt:
-            print("👋 Shutting down...")
             break
         except Exception as e:
-            print(f"❌ Reconnecting in 5s... {e}")
+            print(f"🔄 Reconnecting in 5s... {e}")
             time.sleep(5)
 
 if __name__ == "__main__":
     main()
+EOF
