@@ -1,3 +1,7 @@
+cd ~/Desktop/mvp-toa && cat > requirements.txt << 'EOF'
 websocket-client
 flask
 gunicorn
+psycopg2-binary
+EOF
+
