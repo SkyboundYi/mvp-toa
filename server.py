@@ -1,6 +1,5 @@
-cat > server.py << 'EOF'
-#!/usr/bin/env python3
-import os, json
+import os
+import json
 import psycopg2
 from flask import Flask, jsonify, request
 
@@ -10,16 +9,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 def get_conn():
     return psycopg2.connect(DATABASE_URL)
 
-# TODO: 未来接入 Stripe 鉴权
-def verify_token(token):
-    return True
-
 @app.route("/news")
 def get_news():
-    token = request.headers.get("Authorization", "").replace("Bearer ", "")
-    if not verify_token(token):
-        return jsonify({"error": "Unauthorized"}), 401
-    
     limit = request.args.get("limit", 10, type=int)
     conn = get_conn()
     cur = conn.cursor()
@@ -27,8 +18,6 @@ def get_news():
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    
-    # TODO: 数据清洗逻辑
     results = [{"data": r[0], "received_at": r[1].isoformat()} for r in rows]
     return jsonify({"success": True, "count": len(results), "data": results})
 
@@ -38,9 +27,8 @@ def health():
 
 @app.route("/")
 def index():
-    return jsonify({"service": "ToA News MVP", "endpoints": ["/news", "/health"]})
+    return jsonify({"service": "ToA News MVP"})
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
-EOF
