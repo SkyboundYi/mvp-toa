@@ -1,6 +1,6 @@
 ---
 name: toa-news
-description: Real-time crypto news from Tree of Alpha WebSocket. Millisecond-level market updates, project announcements, and macro news with coin tagging.
+description: Real-time crypto news API with advanced search. Supports keyword search, coin filtering, pagination. 6551-compatible data structure.
 user-invocable: true
 metadata:
   openclaw:
@@ -12,12 +12,12 @@ metadata:
       - darwin
       - linux
       - win32
-  version: 1.0.0
+  version: 2.0.0
 ---
 
 # ToA Crypto News Skill
 
-Query real-time crypto news from the Tree of Alpha WebSocket feed. Data is collected via millisecond-level WebSocket and stored in cloud database.
+Query real-time crypto news from Tree of Alpha WebSocket feed. Supports advanced search with keyword and coin filtering.
 
 **Base URL**: `https://web-production-666f44.up.railway.app`
 
@@ -25,91 +25,114 @@ Query real-time crypto news from the Tree of Alpha WebSocket feed. Data is colle
 
 ## News Operations
 
-### 1. Get Latest News
+### 1. Search News (Primary Endpoint)
 
-Fetch the most recent news articles.
+`POST /news_search` is the primary search endpoint.
 
+**Get latest news:**
 ```bash
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"limit": 10, "page": 1}'
+
+Search by keyword:
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "bitcoin ETF", "limit": 10, "page": 1}'
+Search by coin symbol:
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"coins": ["BTC"], "limit": 10, "page": 1}'
+Search Parameters
+| Parameter | Type     | Required | Description                            |
+| --------- | -------- | -------- | -------------------------------------- |
+| limit     | integer  | yes      | Max results per page (1-100)           |
+| page      | integer  | yes      | Page number (1-based)                  |
+| q         | string   | no       | Full-text keyword search               |
+| coins     | string[] | no       | Filter by coin symbols (e.g. ["BTC"])  |
+| hasCoin   | boolean  | no       | Only return news with associated coins |
+2. Simple News Fetch (Legacy)
+
 curl -s "https://web-production-666f44.up.railway.app/news?limit=10"
-
-2. Get News with Custom Limit
-
-curl -s "https://web-production-666f44.up.railway.app/news?limit=50"
-
-News Parameters
-
-| Parameter | Type    | Required | Description                        |
-| --------- | ------- | -------- | ---------------------------------- |
-| limit     | integer | no       | Max results to return (default 10) |
 
 
 Data Structures
 
-News Article
+News Article (6551-compatible)
 
 {
-  "data": {
-    "_id": "unique-article-id",
-    "title": "Source Name (@handle)",
-    "body": "Full article content or tweet text",
-    "coin": "BTC",
-    "link": "https://twitter.com/...",
-    "time": 1772180907371,
-    "type": "direct",
-    "suggestions": [
-      {
-        "coin": "BTC",
-        "symbols": [
-          {"exchange": "binance-futures", "symbol": "BTCUSDT"},
-          {"exchange": "binance", "symbol": "BTCUSDT"}
-        ]
-      }
-    ]
+  "id": "unique-article-id",
+  "text": "Article headline",
+  "body": "Full content text",
+  "newsType": "Twitter",
+  "engineType": "news",
+  "link": "https://...",
+  "coins": [
+    {"symbol": "BTC", "market_type": "spot", "match": "title"}
+  ],
+  "aiRating": {
+    "score": null,
+    "grade": null,
+    "signal": null,
+    "status": "pending",
+    "summary": null,
+    "enSummary": null
   },
-  "received_at": "2026-02-27T08:28:27.993890+00:00"
+  "ts": 1772180907371,
+  "receivedAt": "2026-02-27T08:28:27+00:00"
 }
 
-Key Fields
+Response Structure
 
-| Field       | Description                          |
-| ----------- | ------------------------------------ |
-| title       | Source name and handle               |
-| body        | Full content text                    |
-| coin        | Primary coin mentioned               |
-| link        | Original source URL                  |
-| time        | Unix timestamp (milliseconds)        |
-| suggestions | Coins detected with exchange symbols |
-
-
+{
+  "success": true,
+  "data": [...],
+  "limit": 10,
+  "page": 1,
+  "total": 1000,
+"quota": "unlimited"
+}
 Common Workflows
 
 Quick Market Overview
 
-curl -s "https://web-production-666f44.up.railway.app/news?limit=5" | jq '.data[] | {title: .data.title, body: .data.body, coin: .data.coin}'
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"limit": 10, "page": 1}' | jq '.data[] | {text, newsType, coins}'
 
-Get Trading Pairs for News
+BTC News Only
 
-curl -s "https://web-production-666f44.up.railway.app/news?limit=10" | jq '.data[].data.suggestions[]?.symbols'
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"coins": ["BTC"], "limit": 20, "page": 1}'
+
+Search for ETF News
+
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "ETF", "limit": 10, "page": 1}'
 
 
 Data Processing Guidelines
 
 When presenting news to users:
 
-1. Extract key info: title, body, coin, link
-2. Summarize impact: Use professional trading analyst tone
-3. Remove noise: Strip technical fields like _id, icon, info
-4. Highlight actionable: Note relevant trading pairs from suggestions
+1. Extract key info: text, body, coins, link
+2. Check aiRating: If status == "done", include score/signal
+3. Summarize impact: Use professional trading analyst tone
+4. Note trading pairs: Extract from coins[].symbols
 Example Output Format
 
 📡 Market Flash (3 items)
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
 1️⃣ [BTC] BlackRock ETF sees $500M single-day inflow
+   📊 AI Score: 85 | Signal: LONG
    💡 Impact: Institutional accumulation, short-term bullish
 
 2️⃣ [ETH] Vitalik announces L2 scaling roadmap  
-   💡 Impact: Bullish for ETH ecosystem, watch ARB/OP
+   📊 AI Score: pending
+   💡 Impact: Bullish for ETH ecosystem
 
 3️⃣ [MACRO] Fed official hints at rate pause
    💡 Impact: Risk-on sentiment for crypto
@@ -119,12 +142,11 @@ Health Check
 
 curl -s "https://web-production-666f44.up.railway.app/health"
 
-Returns: {"status": "ok"}
-
 
 Notes
 
 • Data source: Tree of Alpha WebSocket (real-time)
 • Update frequency: Millisecond-level
 • Storage: Cloud PostgreSQL (persistent)
+• AI ratings: Coming soon (status="pending" for now)
 • Rate limits: None currently
