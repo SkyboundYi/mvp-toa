@@ -20,7 +20,7 @@ metadata:
 当老板要求"查看最新新闻"、"分析当前市场"、"获取 BTC/ETH 情报"时，调用以下 API：
 
 ### 获取最新新闻
-- **Endpoint**: `http://localhost:8000/news`
+- **Endpoint**: `https://web-production-666f44.up.railway.app/news`
 - **Method**: GET
 - **参数**: `limit` (可选，默认 10)
 - 数据处理要求
@@ -33,4 +33,4 @@ metadata:
 剔除所有冗余字段（ID、时间戳等）
 
 ```bash
-curl -s "http://localhost:8000/news?limit=5"
+curl -s "https://web-production-666f44.up.railway.app/news?limit=5"
