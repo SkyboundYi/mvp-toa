@@ -1,9 +1,8 @@
-cat > worker.py << 'EOF'
-#!/usr/bin/env python3
-import os, json, time
-from datetime import datetime
-import websocket
+import os
+import json
+import time
 import psycopg2
+import websocket
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -23,41 +22,40 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-    print("✅ Database initialized")
+    print("Database initialized")
 
 def save_raw(data):
-    # TODO: 未来在这里接入数据清洗逻辑
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("INSERT INTO raw_news (raw_data) VALUES (%s)", (json.dumps(data),))
     conn.commit()
     cur.close()
     conn.close()
-    print("💾 Saved")
+    print("Saved")
 
 def on_message(ws, msg):
     try:
         data = json.loads(msg)
-        print(f"📥 {str(data)[:80]}...")
+        print(f"Received: {str(data)[:80]}...")
         save_raw(data)
     except Exception as e:
-        print(f"❌ {e}")
+        print(f"Error: {e}")
 
 def on_open(ws):
-    print("✅ Connected to ToA")
+    print("Connected to ToA")
 
 def on_error(ws, err):
-    print(f"❌ WS Error: {err}")
+    print(f"WS Error: {err}")
 
 def on_close(ws, code, msg):
-    print(f"🔌 Closed: {code}")
+    print(f"Closed: {code}")
 
 def main():
     if not DATABASE_URL:
-        print("❌ DATABASE_URL not set!")
+        print("DATABASE_URL not set!")
         return
     init_db()
-    print("🚀 Connecting to ToA WebSocket...")
+    print("Connecting to ToA WebSocket...")
     ws = websocket.WebSocketApp(
         "wss://news.treeofalpha.com/ws",
         on_open=on_open,
@@ -71,9 +69,8 @@ def main():
         except KeyboardInterrupt:
             break
         except Exception as e:
-            print(f"🔄 Reconnecting in 5s... {e}")
+            print(f"Reconnecting in 5s... {e}")
             time.sleep(5)
 
 if __name__ == "__main__":
     main()
-EOF
