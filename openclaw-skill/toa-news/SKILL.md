@@ -1,6 +1,5 @@
----
 name: toa-news
-description: Real-time crypto news from Tree of Alpha WebSocket. Millisecond-level market updates, project announcements, and macro news with coin tagging.
+description: Real-time crypto news API with millisecond-level updates. Supports keyword search, coin filtering, and pagination. 6551-compatible format.
 user-invocable: true
 metadata:
   openclaw:
@@ -8,123 +7,168 @@ metadata:
       bins:
         - curl
     emoji: "📡"
+    tags:
+      - crypto
+      - news
+      - trading
+      - api
     os:
       - darwin
       - linux
       - win32
-  version: 1.0.0
+  version: 1.0.1
 ---
 
 # ToA Crypto News Skill
 
-Query real-time crypto news from the Tree of Alpha WebSocket feed. Data is collected via millisecond-level WebSocket and stored in cloud database.
+Real-time crypto news API powered by Tree of Alpha WebSocket. Millisecond-level market updates with coin tagging and search.
 
 **Base URL**: `https://web-production-666f44.up.railway.app`
 
 ---
 
-## News Operations
+## Endpoints
 
-### 1. Get Latest News
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/news` | GET | Simple news fetch |
+| `/news_search` | POST | Advanced search (6551-compatible) |
 
-Fetch the most recent news articles.
+---
+
+## 1. Health Check
 
 ```bash
+curl -s "https://web-production-666f44.up.railway.app/health"
+
+Returns: {"status": "ok"}
+
+
+2. Get Latest News (Simple)
+
 curl -s "https://web-production-666f44.up.railway.app/news?limit=10"
 
-2. Get News with Custom Limit
-
-curl -s "https://web-production-666f44.up.railway.app/news?limit=50"
-
-News Parameters
-
-| Parameter | Type    | Required | Description                        |
-| --------- | ------- | -------- | ---------------------------------- |
-| limit     | integer | no       | Max results to return (default 10) |
+| Parameter | Type    | Default | Description         |
+| --------- | ------- | ------- | ------------------- |
+| limit     | integer | 10      | Max results (1-100) |
 
 
-Data Structures
+3. Advanced Search (Recommended)
 
-News Article
+POST /news_search — 6551-compatible format with filtering and pagination.
+
+Get Latest News
+
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"limit": 10, "page": 1}'
+
+Search by Keyword
+
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "bitcoin ETF", "limit": 10, "page": 1}'
+
+Filter by Coin
+
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"coins": ["BTC", "ETH"], "limit": 10, "page": 1}'
+
+Only News with Coins
+
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"hasCoin": true, "limit": 10, "page": 1}'
+
+Search Parameters
+
+| Parameter | Type     | Required | Description                                 |
+| --------- | -------- | -------- | ------------------------------------------- |
+| limit     | integer  | yes      | Max results per page (1-100)                |
+| page      | integer  | yes      | Page number (1-based)                       |
+| q         | string   | no       | Full-text keyword search                    |
+| coins     | string[] | no       | Filter by coin symbols (e.g. ["BTC","ETH"]) |
+| hasCoin   | boolean  | no       | Only return news with associated coins      |
+
+
+Response Format
 
 {
-  "data": {
-    "_id": "unique-article-id",
-    "title": "Source Name (@handle)",
-    "body": "Full article content or tweet text",
-    "coin": "BTC",
-    "link": "https://twitter.com/...",
-    "time": 1772180907371,
-    "type": "direct",
-    "suggestions": [
-      {
-        "coin": "BTC",
-        "symbols": [
-          {"exchange": "binance-futures", "symbol": "BTCUSDT"},
-          {"exchange": "binance", "symbol": "BTCUSDT"}
-        ]
+  "success": true,
+  "total": 130,
+  "page": 1,
+  "limit": 10,
+  "quota": "unlimited",
+  "data": [
+    {
+      "id": "2027363213940293775",
+      "text": "Yi He (@heyibinance)",
+      "body": "Binance is actively exploring talent...",
+      "newsType": "direct",
+      "engineType": "news",
+      "link": "https://twitter.com/heyibinance/status/...",
+      "ts": 1772196031975,
+      "receivedAt": "2026-02-27T12:40:32.615200+00:00",
+      "coins": [
+        {
+          "symbol": "BNB",
+          "market_type": "spot",
+          "match": "title"
+        }
+      ],
+      "aiRating": {
+        "status": "pending",
+        "score": null,
+        "grade": null,
+        "signal": null,
+        "summary": null,
+        "enSummary": null
       }
-    ]
-  },
-  "received_at": "2026-02-27T08:28:27.993890+00:00"
+    }
+  ]
 }
 
 Key Fields
 
-| Field       | Description                          |
-| ----------- | ------------------------------------ |
-| title       | Source name and handle               |
-| body        | Full content text                    |
-| coin        | Primary coin mentioned               |
-| link        | Original source URL                  |
-| time        | Unix timestamp (milliseconds)        |
-| suggestions | Coins detected with exchange symbols |
+| Field    | Description                           |
+| -------- | ------------------------------------- |
+| id       | Unique article ID                     |
+| text     | Source name and handle                |
+| body     | Full content text                     |
+| coins    | Detected coins with exchange symbols  |
+| link     | Original source URL                   |
+| ts       | Unix timestamp (milliseconds)         |
+| aiRating | AI analysis (pending = not yet rated) |
 
 
 Common Workflows
 
 Quick Market Overview
 
-curl -s "https://web-production-666f44.up.railway.app/news?limit=5" | jq '.data[] | {title: .data.title, body: .data.body, coin: .data.coin}'
+WISEBOT, [2026/2/27 21:31]
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"limit": 5, "page": 1}' | jq '.data[] | {text, body, coins}'
 
-Get Trading Pairs for News
+BTC News Only
 
-curl -s "https://web-production-666f44.up.railway.app/news?limit=10" | jq '.data[].data.suggestions[]?.symbols'
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"coins": ["BTC"], "limit": 10, "page": 1}'
 
+Search Binance News
 
-Data Processing Guidelines
-
-When presenting news to users:
-
-1. Extract key info: title, body, coin, link
-2. Summarize impact: Use professional trading analyst tone
-3. Remove noise: Strip technical fields like _id, icon, info
-4. Highlight actionable: Note relevant trading pairs from suggestions
-Example Output Format
-
-📡 Market Flash (3 items)
-━━━━━━━━━━━━━━━━━━━━━━━━
-
-1️⃣ [BTC] BlackRock ETF sees $500M single-day inflow
-   💡 Impact: Institutional accumulation, short-term bullish
-
-2️⃣ [ETH] Vitalik announces L2 scaling roadmap  
-   💡 Impact: Bullish for ETH ecosystem, watch ARB/OP
-
-3️⃣ [MACRO] Fed official hints at rate pause
-   💡 Impact: Risk-on sentiment for crypto
-
-
-Health Check
-
-curl -s "https://web-production-666f44.up.railway.app/health"
-
-Returns: {"status": "ok"}
+curl -s -X POST "https://web-production-666f44.up.railway.app/news_search" \
+  -H "Content-Type: application/json" \
+  -d '{"q": "Binance", "limit": 10, "page": 1}'
 
 
 Notes
 
 • Data source: Tree of Alpha WebSocket (real-time)
 • Update frequency: Millisecond-level
-• Storage: Cloud PostgreSQL (persistent)
+• Storage: Cloud PostgreSQL (persistent, 24/7)
 • Rate limits: None currently
+• AI Rating: Coming soon (score, grade, signal, summary)
