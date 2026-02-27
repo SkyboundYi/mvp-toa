@@ -1,36 +1,130 @@
 ---
 name: toa-news
-description: 加密货币毫秒级新闻源，获取全球最新市场异动、宏观经济新闻和项目突发公告。
+description: Real-time crypto news from Tree of Alpha WebSocket. Millisecond-level market updates, project announcements, and macro news with coin tagging.
 user-invocable: true
 metadata:
   openclaw:
+    requires:
+      bins:
+        - curl
     emoji: "📡"
     os:
       - darwin
       - linux
+      - win32
   version: 1.0.0
 ---
 
-# ToA News Macro Arbitrage Skill
+# ToA Crypto News Skill
 
-## 简介
-你是老板的首席数据分析师。你现在连接了加密货币市场的最上游新闻源（毫秒级 WebSocket 监听入库的数据）。你可以获取全球最新的加密市场异动、宏观经济新闻和项目突发公告。
+Query real-time crypto news from the Tree of Alpha WebSocket feed. Data is collected via millisecond-level WebSocket and stored in cloud database.
 
-## 工具调用说明
-当老板要求"查看最新新闻"、"分析当前市场"、"获取 BTC/ETH 情报"时，调用以下 API：
+**Base URL**: `https://web-production-666f44.up.railway.app`
 
-### 获取最新新闻
-- **Endpoint**: `https://web-production-666f44.up.railway.app/news`
-- **Method**: GET
-- **参数**: `limit` (可选，默认 10)
-- 数据处理要求
-获取 JSON 后，绝不要把原始 JSON 直接扔给老板。你必须：
+---
 
-提取 title（标题）、body（正文）和 symbols（相关币种）
+## News Operations
 
-用专业、简练的金融交易员口吻总结市场影响
+### 1. Get Latest News
 
-剔除所有冗余字段（ID、时间戳等）
+Fetch the most recent news articles.
 
 ```bash
-curl -s "https://web-production-666f44.up.railway.app/news?limit=5"
+curl -s "https://web-production-666f44.up.railway.app/news?limit=10"
+
+2. Get News with Custom Limit
+
+curl -s "https://web-production-666f44.up.railway.app/news?limit=50"
+
+News Parameters
+
+| Parameter | Type    | Required | Description                        |
+| --------- | ------- | -------- | ---------------------------------- |
+| limit     | integer | no       | Max results to return (default 10) |
+
+
+Data Structures
+
+News Article
+
+{
+  "data": {
+    "_id": "unique-article-id",
+    "title": "Source Name (@handle)",
+    "body": "Full article content or tweet text",
+    "coin": "BTC",
+    "link": "https://twitter.com/...",
+    "time": 1772180907371,
+    "type": "direct",
+    "suggestions": [
+      {
+        "coin": "BTC",
+        "symbols": [
+          {"exchange": "binance-futures", "symbol": "BTCUSDT"},
+          {"exchange": "binance", "symbol": "BTCUSDT"}
+        ]
+      }
+    ]
+  },
+  "received_at": "2026-02-27T08:28:27.993890+00:00"
+}
+
+Key Fields
+
+| Field       | Description                          |
+| ----------- | ------------------------------------ |
+| title       | Source name and handle               |
+| body        | Full content text                    |
+| coin        | Primary coin mentioned               |
+| link        | Original source URL                  |
+| time        | Unix timestamp (milliseconds)        |
+| suggestions | Coins detected with exchange symbols |
+
+
+Common Workflows
+
+Quick Market Overview
+
+curl -s "https://web-production-666f44.up.railway.app/news?limit=5" | jq '.data[] | {title: .data.title, body: .data.body, coin: .data.coin}'
+
+Get Trading Pairs for News
+
+curl -s "https://web-production-666f44.up.railway.app/news?limit=10" | jq '.data[].data.suggestions[]?.symbols'
+
+
+Data Processing Guidelines
+
+When presenting news to users:
+
+1. Extract key info: title, body, coin, link
+2. Summarize impact: Use professional trading analyst tone
+3. Remove noise: Strip technical fields like _id, icon, info
+4. Highlight actionable: Note relevant trading pairs from suggestions
+Example Output Format
+
+📡 Market Flash (3 items)
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣ [BTC] BlackRock ETF sees $500M single-day inflow
+   💡 Impact: Institutional accumulation, short-term bullish
+
+2️⃣ [ETH] Vitalik announces L2 scaling roadmap  
+   💡 Impact: Bullish for ETH ecosystem, watch ARB/OP
+
+3️⃣ [MACRO] Fed official hints at rate pause
+   💡 Impact: Risk-on sentiment for crypto
+
+
+Health Check
+
+curl -s "https://web-production-666f44.up.railway.app/health"
+
+Returns: {"status": "ok"}
+
+
+Notes
+
+• Data source: Tree of Alpha WebSocket (real-time)
+• Update frequency: Millisecond-level
+• Storage: Cloud PostgreSQL (persistent)
+• Rate limits: None currently
